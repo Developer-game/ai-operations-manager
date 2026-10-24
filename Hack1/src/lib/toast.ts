@@ -1,5 +1,5 @@
 // src/lib/toast.ts
-// Lightweight event-driven toast notification manager for ClubOps
+// Lightweight event-driven toast notification manager for Rally
 // Designed with UI/UX Pro Max principles: auto-dismiss 3-4s, accessible status, zero em dashes.
 
 import { sanitizeText } from './sanitizer';

@@ -54,7 +54,7 @@ export async function handleChatbotMessage(
     };
   }
 
-  const isOwner = role?.isOwner || (org && (org as any).ownerUserId === user.id);
+  const isOwner = role?.isOwner || (org && (org as { ownerUserId?: string }).ownerUserId === user.id);
   const isOrganiser = isOwner || role?.name.toLowerCase().includes('organiser') || hasPermission(role, 'roles.edit');
   const userTeam = membership.teamId ? store.getTeams(org.id).find((t) => t.id === membership.teamId) : null;
   const isTeamLead = userTeam?.leadUserId === user.id;
@@ -198,7 +198,7 @@ export async function handleChatbotMessage(
         };
       }
     }
-  } catch (err) {
+  } catch {
     console.warn('API call to /api/ai failed, using grounded local logic.');
   }
 

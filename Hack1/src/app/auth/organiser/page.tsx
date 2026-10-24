@@ -66,7 +66,7 @@ export default function OrganiserSignupPage() {
       return;
     }
 
-    toast.success('Key redeemed successfully! Welcome to ClubOps.', 'Society Established');
+    toast.success('Key redeemed successfully! Welcome to Rally.', 'Society Established');
     setSuccess('Key redeemed successfully! Redirecting to your new society dashboard...');
     setTimeout(() => {
       router.push('/dashboard');
@@ -151,12 +151,37 @@ export default function OrganiserSignupPage() {
             </h1>
             <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
               <SanitizedText>
-                Redeem your single use Organiser Key to establish your society workspace.
+                Redeem an Organiser Key to establish your society workspace, or use instant test login.
               </SanitizedText>
             </p>
           </div>
 
-          {/* Single Demo Organiser Key Helper */}
+          {/* Quick 1-Click Testing Login Button */}
+          <div style={{ marginBottom: '1.25rem' }}>
+            <button
+              type="button"
+              onClick={() => {
+                store.loginDemoUser('organiser');
+                toast.success('Logged in as Demo Organiser (President)', 'Welcome to Rally');
+                router.push('/dashboard');
+              }}
+              className="btn btn-primary"
+              style={{
+                width: '100%',
+                minHeight: '44px',
+                fontSize: '0.9375rem',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '0.5rem',
+              }}
+            >
+              <Crown size={18} />
+              <span>Instant Test Login as Organiser</span>
+            </button>
+          </div>
+
+          {/* Demo Organiser Key Helper */}
           <div
             style={{
               padding: '0.75rem 1rem',
@@ -168,7 +193,7 @@ export default function OrganiserSignupPage() {
             }}
           >
             <div style={{ fontWeight: 600, color: 'var(--text-primary)', marginBottom: '0.375rem' }}>
-              Demo Organiser Account (Click to fill):
+              Fill Demo Organiser Form (Unlimited testing use):
             </div>
             <button
               type="button"

@@ -47,15 +47,12 @@ export function ChatDrawer({ isOpen, onClose }: ChatDrawerProps) {
     {
       id: 'msg-welcome',
       sender: 'assistant',
-      text: `Hello ${firstName}! I am your society AI assistant for ${
-        currentOrg?.name || 'ClubOps'
-      }, powered by Google Gemma 4. I provide answers grounded in real data based on your ${roleLabel} permissions.`,
+      text: `Hello ${firstName}. I am Rally AI. How can I assist you with ${currentOrg?.name || 'your society'} today?`,
       quickReplies: isOrganiser
         ? ['Summary of upcoming events', 'How many members are registered?', 'Check all pending tasks']
         : isTeamLead
         ? ['Show my team tasks', 'Who is in my team?', 'Upcoming events']
         : ['What are my tasks?', 'Who is my team lead?', 'Upcoming events'],
-      modelUsed: 'gemma-4-26b-a4b-it',
     },
   ]);
 
@@ -201,7 +198,7 @@ export function ChatDrawer({ isOpen, onClose }: ChatDrawerProps) {
                 {chatHeaderTitle}
               </div>
               <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                Powered by Google Gemma 4 Intelligence
+                Rally AI Assistant
               </div>
             </div>
           </div>
@@ -256,13 +253,6 @@ export function ChatDrawer({ isOpen, onClose }: ChatDrawerProps) {
                 >
                   <SanitizedText>{msg.text}</SanitizedText>
                 </div>
-
-                {!isUser && msg.modelUsed && (
-                  <div style={{ fontSize: '0.6875rem', color: 'var(--text-muted)', marginTop: '0.2rem', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-                    <Cpu size={10} />
-                    <span>Model: {msg.modelUsed}</span>
-                  </div>
-                )}
 
                 {/* Confirmation Box for Pending Actions */}
                 {msg.pendingAction && (

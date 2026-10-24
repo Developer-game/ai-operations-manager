@@ -5,8 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { store } from '@/lib/store';
 import { toast } from '@/lib/toast';
-import { Navbar } from '@/components/Navbar';
-import { ChatDrawer } from '@/components/ChatDrawer';
+import { AppShell } from '@/components/AppShell';
 import { SanitizedText } from '@/components/SanitizedText';
 import { hasPermission } from '@/lib/permissions';
 import {
@@ -55,10 +54,8 @@ export default function SettingsPage() {
   };
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: 'var(--bg-primary)' }}>
-      <Navbar onOpenChat={() => setIsChatOpen(true)} />
-
-      <main className="container" style={{ flex: 1, paddingTop: '1.75rem', paddingBottom: '3.5rem', maxWidth: '800px' }}>
+    <AppShell>
+      <div style={{ maxWidth: '800px', margin: '0 auto' }}>
         {/* Helper Line at top in plain language */}
         <div style={{ marginBottom: '1.75rem' }}>
           <h1 style={{ fontSize: '1.75rem', color: 'var(--text-primary)', marginBottom: '0.25rem' }}>
@@ -189,9 +186,7 @@ export default function SettingsPage() {
             </div>
           </div>
         </div>
-      </main>
-
-      <ChatDrawer isOpen={isChatOpen} onClose={() => setIsChatOpen(false)} />
-    </div>
+      </div>
+    </AppShell>
   );
 }

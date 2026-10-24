@@ -59,11 +59,11 @@ export default function EntryGatewayPage() {
               boxShadow: 'var(--shadow-glow)',
             }}
           >
-            C
+            R
           </div>
           <div>
             <div style={{ fontWeight: 800, fontSize: '1.375rem', color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>
-              ClubOps
+              Rally
             </div>
             <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 500 }}>
               University Society Intelligence Platform
@@ -357,7 +357,7 @@ export default function EntryGatewayPage() {
           </div>
         </div>
 
-        {/* Quick Launch Demo Banner */}
+        {/* Quick Launch Testing Strip */}
         <div
           className="card"
           style={{
@@ -367,7 +367,7 @@ export default function EntryGatewayPage() {
             gap: '1.5rem',
             flexWrap: 'wrap',
             justifyContent: 'space-between',
-            maxWidth: '820px',
+            maxWidth: '1020px',
             width: '100%',
             border: '2px solid var(--border-focus)',
             background: 'var(--bg-glass)',
@@ -391,18 +391,34 @@ export default function EntryGatewayPage() {
             </div>
             <div>
               <div style={{ fontWeight: 700, fontSize: '1rem', color: 'var(--text-primary)' }}>
-                Explore the Pre-Populated Imperial Robotics Workspace
+                Unlimited Testing & Live Demo Environment
               </div>
               <div style={{ fontSize: '0.8125rem', color: 'var(--text-muted)' }}>
-                Full operational demo with events, availability engine, Discord roles, and Gemma 4 AI.
+                Pre-populated Imperial Robotics society with events, teams, members, WhatsApp, and Rally AI.
               </div>
             </div>
           </div>
 
-          <Link href="/dashboard" className="btn btn-primary" style={{ minHeight: '44px', textDecoration: 'none' }}>
-            <span>Launch Live Demo</span>
-            <ArrowRight size={16} />
-          </Link>
+          <div style={{ display: 'flex', gap: '0.625rem', flexWrap: 'wrap' }}>
+            <Link
+              href="/dashboard"
+              onClick={() => store.loginDemoUser('organiser')}
+              className="btn btn-primary"
+              style={{ minHeight: '44px', textDecoration: 'none' }}
+            >
+              <span>Login as Organiser</span>
+              <ArrowRight size={16} />
+            </Link>
+
+            <Link
+              href="/dashboard"
+              onClick={() => store.loginDemoUser('member')}
+              className="btn btn-secondary"
+              style={{ minHeight: '44px', textDecoration: 'none' }}
+            >
+              <span>Login as Member</span>
+            </Link>
+          </div>
         </div>
       </main>
 
@@ -418,7 +434,7 @@ export default function EntryGatewayPage() {
         }}
       >
         <SanitizedText>
-          ClubOps: Minimal, Accessible, and Colourful Society Intelligence. Strict Zero Em Dash Interface Guarantee.
+          Rally: University Club and Society Operations Platform. Strict Zero Em Dash Interface Guarantee.
         </SanitizedText>
       </footer>
     </div>

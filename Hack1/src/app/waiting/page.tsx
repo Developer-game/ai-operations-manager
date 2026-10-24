@@ -65,9 +65,9 @@ export default function WaitingForInvitationPage() {
               fontWeight: 900,
             }}
           >
-            C
+            R
           </div>
-          <span style={{ fontWeight: 800, fontSize: '1.125rem' }}>ClubOps</span>
+          <span style={{ fontWeight: 800, fontSize: '1.125rem' }}>Rally</span>
         </div>
 
         <ThemeSwitcher />

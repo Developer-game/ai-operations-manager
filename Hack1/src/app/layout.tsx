@@ -3,8 +3,8 @@ import '@/styles/globals.css';
 import { ToastContainer } from '@/components/ToastContainer';
 
 export const metadata: Metadata = {
-  title: 'ClubOps: University Club and Society Operations Platform',
-  description: 'Manage members, user-defined roles, events, tasks, availability, and communications with built-in AI.',
+  title: 'Rally: University Club and Society Operations Platform',
+  description: 'Enterprise university society operations platform for managing members, teams, tasks, events, and communications.',
 };
 
 export default function RootLayout({

@@ -4,8 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { store } from '@/lib/store';
 import { toast } from '@/lib/toast';
-import { Navbar } from '@/components/Navbar';
-import { ChatDrawer } from '@/components/ChatDrawer';
+import { AppShell } from '@/components/AppShell';
 import { SanitizedText } from '@/components/SanitizedText';
 import { DateTimePicker } from '@/components/DateTimePicker';
 import { hasPermission } from '@/lib/permissions';
@@ -145,10 +144,8 @@ export default function EventsManagementPage() {
   };
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: 'var(--bg-primary)' }}>
-      <Navbar onOpenChat={() => setIsChatOpen(true)} />
-
-      <main className="container" style={{ flex: 1, paddingTop: '1.5rem', paddingBottom: '3rem' }}>
+    <AppShell>
+      <div>
         {/* Header */}
         <div
           style={{
@@ -591,9 +588,7 @@ export default function EventsManagementPage() {
             </div>
           </div>
         )}
-      </main>
-
-      <ChatDrawer isOpen={isChatOpen} onClose={() => setIsChatOpen(false)} />
-    </div>
+      </div>
+    </AppShell>
   );
 }

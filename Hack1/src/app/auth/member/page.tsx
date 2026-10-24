@@ -18,10 +18,10 @@ export default function MemberLoginPage() {
   const [info, setInfo] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Single demo member account as required by Section A.2 & Section G
+  // Demo member account
   const demoMember = {
     label: 'Demo Member [Demo Data]',
-    email: 'member@demo.clubops.ac.uk',
+    email: 'member@demo.rally.ac.uk',
   };
 
   const handleFillDemo = () => {
@@ -181,9 +181,34 @@ export default function MemberLoginPage() {
             </h1>
             <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
               <SanitizedText>
-                Sign in with your university email. No password required.
+                Sign in with your university email or use instant test login.
               </SanitizedText>
             </p>
+          </div>
+
+          {/* Quick 1-Click Testing Login Button */}
+          <div style={{ marginBottom: '1.25rem' }}>
+            <button
+              type="button"
+              onClick={() => {
+                store.loginDemoUser('member');
+                toast.success('Logged in as Demo Member', 'Welcome to Rally');
+                router.push('/dashboard');
+              }}
+              className="btn btn-primary"
+              style={{
+                width: '100%',
+                minHeight: '44px',
+                fontSize: '0.9375rem',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '0.5rem',
+              }}
+            >
+              <UserCheck size={18} />
+              <span>Instant Test Login as Member</span>
+            </button>
           </div>
 
           {/* Single Demo Helper */}
@@ -273,7 +298,7 @@ export default function MemberLoginPage() {
                   <input
                     id="member-email"
                     type="email"
-                    placeholder="e.g. member@demo.clubops.ac.uk"
+                    placeholder="e.g. member@demo.rally.ac.uk"
                     value={email}
                     onChange={(e) => {
                       setEmail(e.target.value);

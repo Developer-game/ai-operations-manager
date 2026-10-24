@@ -1,11 +1,10 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import { store } from '@/lib/store';
 import { toast } from '@/lib/toast';
-import { Navbar } from '@/components/Navbar';
-import { ChatDrawer } from '@/components/ChatDrawer';
+import { AppShell } from '@/components/AppShell';
 import { SanitizedText } from '@/components/SanitizedText';
 import { CheckSquare, CheckCircle2, Clock, Plus, Filter, AlertCircle } from 'lucide-react';
 import { Task } from '@/types';
@@ -14,18 +13,11 @@ export default function MyTasksPage() {
   const currentOrg = store.getCurrentOrg();
   const currentUser = store.getCurrentUser();
   const { membership } = store.getCurrentMembership();
-  const [isChatOpen, setIsChatOpen] = useState(false);
   const [filter, setFilter] = useState<'all' | 'todo' | 'completed'>('all');
 
   const [taskList, setTaskList] = useState<Task[]>(() => {
     return currentUser ? store.getUserTasks(currentUser.id) : [];
   });
-
-  useEffect(() => {
-    if (currentUser) {
-      setTaskList(store.getUserTasks(currentUser.id));
-    }
-  }, [currentUser]);
 
   if (!currentOrg || !currentUser) return null;
 
@@ -47,10 +39,8 @@ export default function MyTasksPage() {
   });
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: 'var(--bg-primary)' }}>
-      <Navbar onOpenChat={() => setIsChatOpen(true)} />
-
-      <main className="container" style={{ flex: 1, paddingTop: '1.75rem', paddingBottom: '3.5rem', maxWidth: '820px' }}>
+    <AppShell>
+      <div style={{ maxWidth: '820px', margin: '0 auto' }}>
         {/* Helper Line */}
         <div style={{ marginBottom: '1.5rem' }}>
           <h1 style={{ fontSize: '1.75rem', color: 'var(--text-primary)', marginBottom: '0.25rem' }}>
@@ -184,9 +174,7 @@ export default function MyTasksPage() {
             })}
           </div>
         )}
-      </main>
-
-      <ChatDrawer isOpen={isChatOpen} onClose={() => setIsChatOpen(false)} />
-    </div>
+      </div>
+    </AppShell>
   );
 }

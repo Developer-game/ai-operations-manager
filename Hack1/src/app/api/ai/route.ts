@@ -19,20 +19,20 @@ export async function POST(req: NextRequest) {
     const roleTitle = userRole || 'Member';
     const callerName = userName || 'User';
 
-    const systemInstructions = `You are the ClubOps AI Assistant for university student societies, powered by Google Gemma 4.
-You are currently chatting with ${callerName}, whose role is "${roleTitle}".
-Identity & Permissions Rules:
-1. ONLY share information that this user is permitted to see based on their role:
+    const systemInstructions = `You are Rally AI, the direct and intelligent operations assistant for university student societies.
+You are currently assisting ${callerName} (${roleTitle}).
+
+CRITICAL INSTRUCTIONS:
+1. ZERO THOUGHT PROCESS: Do NOT output any internal thoughts, reasoning process, analysis steps, meta-commentary, or chain of thought. Never output <thought>, <think>, "Thinking Process:", "Here is the response:", or explain why you are giving the answer.
+2. DIRECT OUTPUT ONLY: Provide strictly and immediately only the exact answer, summary, or action requested by the user. Be concise, direct, professional, and actionable. Do not add disclaimers or unnecessary conversational fluff.
+3. Identity & Permissions Rules:
    - Organiser: Allowed full access to all society metrics, events, all members, all tasks, teams, and role permissions.
    - Team Lead: Allowed access to their team's tasks, their team's members, upcoming events, and their own tasks. Cannot see other teams' private data.
    - Member: Allowed access ONLY to their own tasks, their events, and their team lead's name. Cannot see other members or society-wide administrative settings.
-2. Grounded Data:
+4. Grounded Data:
 ${JSON.stringify(context || {}, null, 2)}
-3. Honesty: Only state facts that appear in the grounded data above. If a piece of data is missing or not assigned, state that clearly and honestly. Do not hallucinate or invent records.
-4. Formatting Rules:
-   - STRICTLY ZERO em dashes or en dashes anywhere. Use colons, commas, or parentheses instead.
-   - Keep answers clear, friendly, helpful, and concise (2 to 4 sentences).
-   - If the user asks for actions or duties, offer practical steps.`;
+5. Honesty: Only state facts that appear in the grounded data above. If a piece of data is missing or not assigned, state that directly.
+6. Formatting: Strictly zero em dashes or en dashes. Use colons, commas, or parentheses instead.`;
 
     // Construct multi-turn contents for Gemma 4
     const contents: Array<{ role: string; parts: Array<{ text: string }> }> = [];
@@ -46,14 +46,14 @@ ${JSON.stringify(context || {}, null, 2)}
       role: 'model',
       parts: [
         {
-          text: `Understood. I am ready to assist ${callerName} (${roleTitle}) with grounded information from ${context?.societyName || 'the society'}. I will never use em dashes and will respect all role permissions.`,
+          text: `Understood. I am Rally AI. I will provide strictly direct, concise answers without showing any internal thinking, thought processes, or meta-explanations.`,
         },
       ],
     });
 
     // Append conversation history if available
     if (Array.isArray(history) && history.length > 0) {
-      history.slice(-8).forEach((item: { sender: 'user' | 'assistant'; text: string }) => {
+      history.slice(-6).forEach((item: { sender: 'user' | 'assistant'; text: string }) => {
         contents.push({
           role: item.sender === 'user' ? 'user' : 'model',
           parts: [{ text: item.text }],
@@ -77,7 +77,7 @@ ${JSON.stringify(context || {}, null, 2)}
         body: JSON.stringify({
           contents,
           generationConfig: {
-            temperature: 0.2,
+            temperature: 0.1,
           },
         }),
       }
@@ -85,7 +85,7 @@ ${JSON.stringify(context || {}, null, 2)}
 
     if (!response.ok) {
       const errText = await response.text();
-      console.warn('Gemma 4 API non-200 response:', errText);
+      console.warn('AI API non-200 response:', errText);
       return NextResponse.json({
         success: false,
         error: 'The AI model is temporarily unavailable. Please try again shortly.',
@@ -95,18 +95,30 @@ ${JSON.stringify(context || {}, null, 2)}
     const data = await response.json();
     const candidateParts = data?.candidates?.[0]?.content?.parts || [];
 
-    // CRITICAL FIX: In Gemma 4 thinking models, part with thought: true is the scratchpad.
-    // The final answer is the part without thought: true.
+    // Thoroughly strip all thought processes, scratchpads, and thinking tokens
     let answerText = '';
-    const nonThoughtPart = candidateParts.find((p: any) => !p.thought);
-    if (nonThoughtPart && nonThoughtPart.text) {
-      answerText = nonThoughtPart.text;
+    const nonThoughtParts = candidateParts.filter((p: { thought?: boolean; text?: string }) => !p.thought);
+
+    if (nonThoughtParts.length > 0) {
+      answerText = nonThoughtParts.map((p: { text?: string }) => p.text || '').join('\n');
     } else {
-      // Fallback to last part text
       answerText = candidateParts[candidateParts.length - 1]?.text || '';
     }
 
-    const sanitized = sanitizeNoEmDash(answerText.trim());
+    // Secondary sanitization: remove any inline XML/markdown thinking tags or headings
+    let cleaned = answerText
+      .replace(/<thought>[\s\S]*?<\/thought>/gi, '')
+      .replace(/<think>[\s\S]*?<\/think>/gi, '')
+      .replace(/^(\*+)?(thinking process|thought process|thoughts?):?(\*+)?[\s\S]*?\n\n/i, '')
+      .replace(/^\*+Thinking:?\*+[\s\S]*?\n\n/i, '')
+      .replace(/^The user is asking[\s\S]*?\n\n/i, '')
+      .trim();
+
+    if (!cleaned && answerText) {
+      cleaned = answerText.trim();
+    }
+
+    const sanitized = sanitizeNoEmDash(cleaned);
 
     return NextResponse.json({
       success: true,

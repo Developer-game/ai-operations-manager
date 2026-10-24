@@ -3,8 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { store } from '@/lib/store';
 import { toast } from '@/lib/toast';
-import { Navbar } from '@/components/Navbar';
-import { ChatDrawer } from '@/components/ChatDrawer';
+import { AppShell } from '@/components/AppShell';
 import { SanitizedText } from '@/components/SanitizedText';
 import { Switch } from '@/components/Switch';
 import { PERMISSION_DEFINITIONS, canManageRole, hasPermission } from '@/lib/permissions';
@@ -196,10 +195,8 @@ export default function RolesManagementPage() {
   };
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: 'var(--bg-primary)' }}>
-      <Navbar onOpenChat={() => setIsChatOpen(true)} />
-
-      <main className="container" style={{ flex: 1, paddingTop: '1.75rem', paddingBottom: '3.5rem' }}>
+    <AppShell>
+      <div>
         {/* Header */}
         <div
           style={{
@@ -562,9 +559,7 @@ export default function RolesManagementPage() {
             </div>
           </div>
         )}
-      </main>
-
-      <ChatDrawer isOpen={isChatOpen} onClose={() => setIsChatOpen(false)} />
-    </div>
+      </div>
+    </AppShell>
   );
 }

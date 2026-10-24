@@ -17,6 +17,7 @@ import {
   Building,
   LogOut,
   ChevronDown,
+  Share2,
 } from 'lucide-react';
 
 interface NavbarProps {
@@ -71,7 +72,7 @@ export function Navbar({ onOpenChat }: NavbarProps) {
     { href: '/dashboard', label: 'Home', icon: <Building size={16} /> },
     { href: '/members', label: 'Members', icon: <Users size={16} /> },
     { href: '/events', label: 'Events', icon: <Calendar size={16} /> },
-    { href: '/comms', label: 'Messages', icon: <MessageSquare size={16} /> },
+    { href: '/social', label: 'Social', icon: <Share2 size={16} /> },
     { href: '/settings', label: 'Settings', icon: <Settings size={16} /> },
   ];
 
@@ -79,6 +80,7 @@ export function Navbar({ onOpenChat }: NavbarProps) {
     { href: '/dashboard', label: 'Home', icon: <Building size={16} /> },
     { href: '/events', label: 'My Events', icon: <Calendar size={16} /> },
     { href: '/tasks', label: 'My Tasks', icon: <CheckSquare size={16} /> },
+    { href: '/social', label: 'Social', icon: <Share2 size={16} /> },
   ];
 
   const activeNavItems = isOrganiser ? organiserNav : memberNav;
@@ -137,9 +139,9 @@ export function Navbar({ onOpenChat }: NavbarProps) {
                 fontSize: '1.125rem',
               }}
             >
-              C
+              R
             </div>
-            <span>ClubOps</span>
+            <span>Rally</span>
           </Link>
 
           {currentOrg && (
