@@ -1,11 +1,12 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from app.api.routes.autopilot import router as autopilot_router
 from app.api.routes.ops import router as ops_router
 
 app = FastAPI(
-    title="AI Operations Manager API",
-    description="Agentic backend for autonomous operations, incident triage, and system healing.",
-    version="1.0.0"
+    title="Campus Society Autopilot API (Gemma Powered)",
+    description="Autonomous Multi-Agent Operations Manager for University Events & Workshops.",
+    version="2.0.0"
 )
 
 # Enable CORS for frontend dashboard
@@ -17,6 +18,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.include_router(autopilot_router)
 app.include_router(ops_router)
 
 @app.get("/")
