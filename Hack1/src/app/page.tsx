@@ -2,6 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
+import { store } from '@/lib/store';
 import { ThemeSwitcher } from '@/components/ThemeSwitcher';
 import { SanitizedText } from '@/components/SanitizedText';
 import {

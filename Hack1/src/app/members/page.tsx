@@ -281,7 +281,7 @@ export default function MembersDirectoryPage() {
     setParseError('');
 
     try {
-      const preview = await parseSpreadsheetFile(file, currentOrg.id);
+      const preview = await parseSpreadsheetFile(currentOrg.id, file);
       setImportPreview(preview);
     } catch {
       setParseError('Failed to parse spreadsheet file. Please verify CSV or Excel columns.');
@@ -295,8 +295,9 @@ export default function MembersDirectoryPage() {
     setIsImporting(true);
 
     try {
-      const summary = await commitSpreadsheetImport(currentOrg.id, importPreview.validRows);
-      toast.success(`Successfully imported ${summary.importedCount} members across ${summary.teamsCreated} teams!`, 'Import Completed');
+      const validMembers = importPreview.members.filter((m) => m.status !== 'error');
+      const summary = commitSpreadsheetImport(currentOrg.id, validMembers);
+      toast.success(`Successfully imported ${summary.addedCount} members (${summary.skippedCount} skipped)!`, 'Import Completed');
       setShowImportModal(false);
       setImportPreview(null);
       setImportFile(null);
@@ -1618,7 +1619,7 @@ export default function MembersDirectoryPage() {
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                 <div style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)' }}>
-                  Found <strong>{importPreview.validRows.length}</strong> valid rows.
+                  Found <strong>{importPreview.members.filter((m) => m.status !== 'error').length}</strong> valid rows ({importPreview.errorCount} with errors).
                 </div>
 
                 <div className="enterprise-table-container" style={{ maxHeight: '240px' }}>
@@ -1632,14 +1633,16 @@ export default function MembersDirectoryPage() {
                       </tr>
                     </thead>
                     <tbody>
-                      {importPreview.validRows.map((r, i) => (
-                        <tr key={i}>
-                          <td>{r.fullName}</td>
-                          <td>{r.email}</td>
-                          <td>{r.roleName}</td>
-                          <td>{r.teamName || 'None'}</td>
-                        </tr>
-                      ))}
+                      {importPreview.members
+                        .filter((m) => m.status !== 'error')
+                        .map((r, i) => (
+                          <tr key={i}>
+                            <td>{r.fullName}</td>
+                            <td>{r.email}</td>
+                            <td>{r.roleName}</td>
+                            <td>{r.teamName || 'None'}</td>
+                          </tr>
+                        ))}
                     </tbody>
                   </table>
                 </div>
@@ -1660,7 +1663,9 @@ export default function MembersDirectoryPage() {
                     className="btn btn-primary"
                     style={{ flex: 1, minHeight: '38px', fontSize: '0.8125rem' }}
                   >
-                    {isImporting ? 'Importing...' : `Import ${importPreview.validRows.length} Members`}
+                    {isImporting
+                      ? 'Importing...'
+                      : `Import ${importPreview.members.filter((m) => m.status !== 'error').length} Members`}
                   </button>
                 </div>
               </div>

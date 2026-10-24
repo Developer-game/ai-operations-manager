@@ -137,7 +137,12 @@ export default function SocialMediaHubPage() {
   const handleDispatchWhatsApp = () => {
     setIsSendingWhatsApp(true);
 
-    const messageText = customWhatsAppBody.trim() || draftWhatsAppMessage(currentOrg.id, templateType).renderedPreview;
+    const messageText =
+      customWhatsAppBody.trim() ||
+      draftWhatsAppMessage(currentOrg.id, templateType, {
+        eventTitle: events[0]?.title || 'Robotics Term Showcase',
+        location: events[0]?.location || 'Main Lecture Theatre 1',
+      }).body;
 
     setTimeout(() => {
       store.logAction('whatsapp.broadcast', 'comms', undefined, {
@@ -501,22 +506,22 @@ export default function SocialMediaHubPage() {
                     <button
                       type="button"
                       onClick={() => {
-                        setTemplateType('event_reminder');
+                        setTemplateType('broadcast_invite');
                         setCustomWhatsAppBody('');
                       }}
-                      className={`filter-chip ${templateType === 'event_reminder' ? 'active' : ''}`}
+                      className={`filter-chip ${templateType === 'broadcast_invite' ? 'active' : ''}`}
                     >
-                      Event Reminder
+                      Broadcast Invite
                     </button>
                     <button
                       type="button"
                       onClick={() => {
-                        setTemplateType('room_change');
+                        setTemplateType('polite_checkin');
                         setCustomWhatsAppBody('');
                       }}
-                      className={`filter-chip ${templateType === 'room_change' ? 'active' : ''}`}
+                      className={`filter-chip ${templateType === 'polite_checkin' ? 'active' : ''}`}
                     >
-                      Room Change
+                      Member Check-in
                     </button>
                   </div>
                 </div>
@@ -643,7 +648,7 @@ export default function SocialMediaHubPage() {
                       draftWhatsAppMessage(currentOrg.id, templateType, {
                         eventTitle: events[0]?.title || 'Robotics Term Showcase',
                         location: events[0]?.location || 'Main Lecture Theatre 1',
-                      }).renderedPreview}
+                      }).body}
                   </div>
 
                   <div
