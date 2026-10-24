@@ -28,17 +28,21 @@ import {
   Check,
   X,
   MapPin,
-  DollarSign
+  DollarSign,
+  ArrowUpRight,
+  ClipboardCheck,
+  Radio,
+  Workflow
 } from 'lucide-react';
 
 const API_BASE = 'http://localhost:8000/api';
 
 const EVENT_PHASES = [
-  { id: 'planning', label: '1. Planning' },
-  { id: 'promotions', label: '2. Promotions' },
-  { id: 'event_day', label: '3. Event Day' },
-  { id: 'post_production', label: '4. Post-Production' },
-  { id: 'wrapup', label: '5. Wrap-Up' }
+  { id: 'planning', label: '1. Planning', desc: 'Milestones & Budget' },
+  { id: 'promotions', label: '2. Promotions', desc: 'Posters & Registration' },
+  { id: 'event_day', label: '3. Event Day', desc: 'Live Execution' },
+  { id: 'post_production', label: '4. Post-Production', desc: 'Recap & Photos' },
+  { id: 'wrapup', label: '5. Wrap-Up', desc: 'Retrospective & Audit' }
 ];
 
 export default function App() {
@@ -64,7 +68,6 @@ export default function App() {
   // Filter for tasks tab
   const [taskPhaseFilter, setTaskPhaseFilter] = useState('all');
 
-  // Load event list & state on mount
   useEffect(() => {
     fetchEvents();
     fetchSettings();
@@ -167,7 +170,7 @@ export default function App() {
       });
       const data = await res.json();
       setState(data);
-      showToast(`Approval ${status === 'approved' ? 'GRANTED & Applied' : 'Declined'}`, status === 'approved' ? 'success' : 'info');
+      showToast(`Approval ${status === 'approved' ? 'AUTHORIZED & Applied' : 'Declined'}`, status === 'approved' ? 'success' : 'info');
     } catch (err) {
       showToast('Failed to process approval', 'error');
     } finally {
@@ -273,11 +276,10 @@ export default function App() {
   const completionPct = tasks.length ? Math.round((completedTasks.length / tasks.length) * 100) : 0;
   const pendingApprovals = approvals.filter(a => a.status === 'pending');
   const missingAssets = assets.filter(a => a.status === 'missing');
-
   const filteredTasks = taskPhaseFilter === 'all' ? tasks : tasks.filter(t => t.phase === taskPhaseFilter);
 
   return (
-    <div style={{ maxWidth: 1440, margin: '0 auto', padding: '20px 28px' }}>
+    <div style={{ maxWidth: 1440, margin: '0 auto', padding: '24px 32px' }}>
       {/* Toast Notification */}
       {notification && (
         <div style={{
@@ -286,11 +288,11 @@ export default function App() {
           right: 24,
           zIndex: 9999,
           padding: '12px 20px',
-          borderRadius: 8,
+          borderRadius: 10,
           background: notification.type === 'error' ? 'rgba(239, 68, 68, 0.95)' : (notification.type === 'warning' ? 'rgba(245, 158, 11, 0.95)' : 'rgba(99, 102, 241, 0.95)'),
-          color: '#fff',
-          fontWeight: 500,
-          boxShadow: '0 8px 30px rgba(0,0,0,0.5)',
+          color: '#ffffff',
+          fontWeight: 600,
+          boxShadow: '0 10px 35px rgba(0,0,0,0.6)',
           display: 'flex',
           alignItems: 'center',
           gap: 10,
@@ -301,16 +303,16 @@ export default function App() {
         </div>
       )}
 
-      {/* Main App Header */}
+      {/* Main Navigation Header */}
       <header style={{
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        paddingBottom: 20,
+        paddingBottom: 22,
         borderBottom: '1px solid var(--border-subtle)',
         marginBottom: 24
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
           <div style={{
             background: 'linear-gradient(135deg, #6366f1, #06b6d4)',
             width: 48,
@@ -321,26 +323,22 @@ export default function App() {
             justifyContent: 'center',
             boxShadow: '0 0 25px rgba(99, 102, 241, 0.45)'
           }}>
-            <Bot size={28} color="#fff" />
+            <Bot size={28} color="#ffffff" />
           </div>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <h1 style={{ fontSize: 22, fontWeight: 700, letterSpacing: '-0.02em' }}>
+              <h1 style={{ fontSize: 22, fontWeight: 700, letterSpacing: '-0.02em', margin: 0 }}>
                 Campus Society Autopilot
               </h1>
-              <span style={{
-                fontSize: 11,
-                fontFamily: 'var(--font-mono)',
-                padding: '2px 8px',
-                borderRadius: 4,
-                background: 'rgba(99, 102, 241, 0.2)',
+              <span className="badge-atomic" style={{
+                background: 'rgba(99, 102, 241, 0.18)',
                 color: 'var(--color-cyan)',
-                border: '1px solid rgba(99, 102, 241, 0.3)'
-              }}>
-                Gemma Multi-Agent
+                border: '1px solid rgba(99, 102, 241, 0.35)'
+              }} role="status" aria-atomic="true">
+                <Sparkles size={11} /> Gemma Multi-Agent
               </span>
             </div>
-            <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>
+            <p style={{ fontSize: 13, color: 'var(--text-muted)', margin: '2px 0 0 0' }}>
               Autonomous Operations Manager for University Events, Workshops & Hackathons
             </p>
           </div>
@@ -349,53 +347,56 @@ export default function App() {
         {/* Right Header Controls */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           {/* Gemma Status Pill */}
-          <div 
+          <button
             onClick={() => setShowSettingsModal(true)}
             style={{
               display: 'flex',
               alignItems: 'center',
               gap: 8,
-              padding: '6px 14px',
-              borderRadius: 9999,
+              padding: '7px 14px',
+              borderRadius: 'var(--radius-full)',
               background: settings.has_key ? 'rgba(16, 185, 129, 0.12)' : 'rgba(245, 158, 11, 0.12)',
-              border: `1px solid ${settings.has_key ? 'rgba(16, 185, 129, 0.3)' : 'rgba(245, 158, 11, 0.3)'}`,
-              color: settings.has_key ? 'var(--color-emerald)' : 'var(--color-amber)',
+              border: `1px solid ${settings.has_key ? 'rgba(16, 185, 129, 0.35)' : 'rgba(245, 158, 11, 0.35)'}`,
+              color: settings.has_key ? 'var(--color-emerald)' : 'var(--color-accent)',
               fontSize: 12,
               cursor: 'pointer',
-              fontWeight: 500
+              fontWeight: 600,
+              fontFamily: 'var(--font-sans)'
             }}
           >
-            <Sparkles size={14} />
-            <span>LLM: {settings.model} {settings.has_key ? '● Ready' : '○ Free / Key Setup'}</span>
-            <Settings size={12} style={{ marginLeft: 4, opacity: 0.7 }} />
-          </div>
+            <Radio size={13} className="animate-pulse" />
+            <span>LLM: {settings.model} {settings.has_key ? '● Connected' : '○ Free / Key Setup'}</span>
+            <Settings size={13} style={{ marginLeft: 4, opacity: 0.7 }} />
+          </button>
 
           <button 
             className="btn-secondary" 
             onClick={() => setShowNewEventModal(true)}
             style={{ fontSize: 13 }}
           >
-            <Plus size={14} />
+            <Plus size={15} />
             Intake New Event
           </button>
         </div>
       </header>
 
-      {/* Event Details & Timeline Phase Selector */}
-      <div className="glass-panel" style={{ padding: '18px 24px', marginBottom: 20 }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 16 }}>
+      {/* Hero Bento Card: Event Parameters & Phase Progression */}
+      <div className="bento-card" style={{ padding: '20px 26px', marginBottom: 20 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 20 }}>
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6, flexWrap: 'wrap' }}>
               <span style={{
                 textTransform: 'uppercase',
                 fontSize: 11,
                 fontWeight: 700,
                 color: 'var(--color-indigo)',
-                letterSpacing: '0.05em'
+                letterSpacing: '0.06em',
+                background: 'rgba(99, 102, 241, 0.15)',
+                padding: '2px 8px',
+                borderRadius: 4
               }}>
                 {event.category || 'Workshop'}
               </span>
-              <span style={{ color: 'var(--text-dim)' }}>•</span>
               <span style={{ fontSize: 13, color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: 4 }}>
                 <Calendar size={13} /> {event.date_str}
               </span>
@@ -407,12 +408,19 @@ export default function App() {
               <span style={{ fontSize: 13, color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: 4 }}>
                 <Users size={13} /> {event.expected_audience} Attendees
               </span>
+              <span style={{ color: 'var(--text-dim)' }}>•</span>
+              <span style={{ fontSize: 13, color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: 4 }}>
+                <DollarSign size={13} /> {event.budget}
+              </span>
             </div>
-            <h2 style={{ fontSize: 19, fontWeight: 700 }}>{event.title}</h2>
+            <h2 style={{ fontSize: 20, fontWeight: 700, margin: '4px 0 6px 0' }}>{event.title}</h2>
+            <p style={{ fontSize: 13, color: 'var(--text-muted)', margin: 0, maxWidth: 800 }}>
+              {event.description}
+            </p>
           </div>
 
-          {/* Phase Selector Pills */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'rgba(0,0,0,0.3)', padding: 4, borderRadius: 10 }}>
+          {/* Phase Selector Pills with description cues */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'rgba(0,0,0,0.35)', padding: 6, borderRadius: 'var(--radius-md)' }}>
             {EVENT_PHASES.map((ph) => {
               const isActive = event.phase === ph.id;
               return (
@@ -421,18 +429,23 @@ export default function App() {
                   onClick={() => handlePhaseChange(ph.id)}
                   disabled={actionLoading}
                   style={{
-                    padding: '6px 14px',
-                    borderRadius: 8,
+                    padding: '8px 14px',
+                    borderRadius: 'var(--radius-sm)',
                     fontSize: 12,
                     fontWeight: 600,
                     border: 'none',
                     cursor: 'pointer',
                     transition: 'all 0.2s',
                     background: isActive ? 'linear-gradient(135deg, #6366f1, #06b6d4)' : 'transparent',
-                    color: isActive ? '#fff' : 'var(--text-muted)'
+                    color: isActive ? '#ffffff' : 'var(--text-muted)',
+                    boxShadow: isActive ? '0 2px 10px rgba(99, 102, 241, 0.4)' : 'none',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'flex-start'
                   }}
                 >
-                  {ph.label}
+                  <span>{ph.label}</span>
+                  <span style={{ fontSize: 10, opacity: isActive ? 0.9 : 0.6, fontWeight: 400 }}>{ph.desc}</span>
                 </button>
               );
             })}
@@ -440,25 +453,25 @@ export default function App() {
         </div>
       </div>
 
-      {/* Interactive Pitch Simulation Controller (Hackathon Pitch Controls) */}
+      {/* Interactive Pitch Simulation Controller Bar */}
       <div style={{
-        background: 'linear-gradient(90deg, rgba(99, 102, 241, 0.15), rgba(6, 182, 212, 0.12))',
+        background: 'linear-gradient(90deg, rgba(99, 102, 241, 0.16), rgba(6, 182, 212, 0.12))',
         border: '1px solid var(--border-accent)',
         borderRadius: 'var(--radius-md)',
-        padding: '14px 20px',
+        padding: '14px 22px',
         marginBottom: 24,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
         flexWrap: 'wrap',
-        gap: 12
+        gap: 14
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <div style={{
             background: 'var(--color-indigo)',
-            color: '#fff',
+            color: '#ffffff',
             borderRadius: 6,
-            padding: '3px 8px',
+            padding: '3px 9px',
             fontSize: 11,
             fontWeight: 800,
             letterSpacing: '0.05em'
@@ -466,7 +479,7 @@ export default function App() {
             HACKATHON LIVE DEMO
           </div>
           <span style={{ fontSize: 13, color: 'var(--text-main)', fontWeight: 500 }}>
-            Simulate dynamic operational bottlenecks to test Gemma autonomous recovery:
+            Trigger real-time operational bottlenecks to demonstrate Gemma autonomous recovery:
           </span>
         </div>
 
@@ -475,7 +488,6 @@ export default function App() {
             onClick={handleSimulateDropout}
             disabled={actionLoading}
             className="btn-danger"
-            style={{ fontSize: 12 }}
           >
             <AlertTriangle size={14} />
             Simulate: Designer Dropout
@@ -485,7 +497,6 @@ export default function App() {
             onClick={handleSimulateMissingVideo}
             disabled={actionLoading}
             className="btn-danger"
-            style={{ fontSize: 12 }}
           >
             <Video size={14} />
             Simulate: Missing Recap Video
@@ -494,7 +505,6 @@ export default function App() {
           <button
             onClick={() => loadEventState(currentEventId)}
             className="btn-secondary"
-            style={{ fontSize: 12 }}
           >
             <RefreshCw size={13} />
             Sync State
@@ -528,7 +538,7 @@ export default function App() {
                 display: 'flex',
                 alignItems: 'center',
                 gap: 8,
-                padding: '10px 18px',
+                padding: '11px 20px',
                 border: 'none',
                 background: 'transparent',
                 color: isActive ? 'var(--color-cyan)' : 'var(--text-muted)',
@@ -536,7 +546,7 @@ export default function App() {
                 fontSize: 14,
                 cursor: 'pointer',
                 borderBottom: isActive ? '2px solid var(--color-cyan)' : '2px solid transparent',
-                transition: 'all 0.2s',
+                transition: 'all 0.2s ease',
                 whiteSpace: 'nowrap'
               }}
             >
@@ -545,10 +555,10 @@ export default function App() {
               {tab.badge && (
                 <span style={{
                   fontSize: 11,
-                  padding: '1px 6px',
-                  borderRadius: 9999,
+                  padding: '2px 7px',
+                  borderRadius: 'var(--radius-full)',
                   background: tab.badgeColor === 'crimson' ? 'rgba(239, 68, 68, 0.25)' : (tab.badgeColor === 'amber' ? 'rgba(245, 158, 11, 0.25)' : 'rgba(99, 102, 241, 0.2)'),
-                  color: tab.badgeColor === 'crimson' ? 'var(--color-crimson)' : (tab.badgeColor === 'amber' ? 'var(--color-amber)' : 'var(--color-indigo)'),
+                  color: tab.badgeColor === 'crimson' ? 'var(--color-crimson)' : (tab.badgeColor === 'amber' ? 'var(--color-accent)' : 'var(--color-indigo)'),
                   fontWeight: 700
                 }}>
                   {tab.badge}
@@ -562,15 +572,15 @@ export default function App() {
       {/* TAB 1: OPERATIONS RADAR & OVERVIEW */}
       {activeTab === 'overview' && (
         <div>
-          {/* Quick Stats Grid */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 18, marginBottom: 24 }}>
-            <div className="glass-panel" style={{ padding: 20 }}>
+          {/* Quick Stats Bento Row */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 18, marginBottom: 24 }}>
+            <div className="bento-card" style={{ padding: 22 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-muted)', fontSize: 13, marginBottom: 8 }}>
                 <span>Milestone Completion</span>
                 <CheckCircle2 size={16} color="var(--color-emerald)" />
               </div>
-              <div style={{ fontSize: 28, fontWeight: 700, marginBottom: 10 }}>{completionPct}%</div>
-              <div style={{ width: '100%', height: 6, background: 'rgba(255,255,255,0.08)', borderRadius: 9999, overflow: 'hidden' }}>
+              <div style={{ fontSize: 32, fontWeight: 700, marginBottom: 10 }}>{completionPct}%</div>
+              <div style={{ width: '100%', height: 7, background: 'rgba(255,255,255,0.08)', borderRadius: 9999, overflow: 'hidden' }}>
                 <div style={{ width: `${completionPct}%`, height: '100%', background: 'linear-gradient(90deg, #6366f1, #10b981)' }} />
               </div>
               <div style={{ fontSize: 12, color: 'var(--text-dim)', marginTop: 8 }}>
@@ -578,12 +588,12 @@ export default function App() {
               </div>
             </div>
 
-            <div className="glass-panel" style={{ padding: 20 }}>
+            <div className="bento-card" style={{ padding: 22 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-muted)', fontSize: 13, marginBottom: 8 }}>
                 <span>Active Bottlenecks</span>
                 <ShieldAlert size={16} color={state.bottlenecks_count > 0 ? "var(--color-crimson)" : "var(--color-emerald)"} />
               </div>
-              <div style={{ fontSize: 28, fontWeight: 700, color: state.bottlenecks_count > 0 ? "var(--color-crimson)" : "var(--text-main)", marginBottom: 6 }}>
+              <div style={{ fontSize: 32, fontWeight: 700, color: state.bottlenecks_count > 0 ? "var(--color-crimson)" : "var(--text-main)", marginBottom: 6 }}>
                 {state.bottlenecks_count}
               </div>
               <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>
@@ -591,12 +601,12 @@ export default function App() {
               </p>
             </div>
 
-            <div className="glass-panel" style={{ padding: 20 }}>
+            <div className="bento-card" style={{ padding: 22 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-muted)', fontSize: 13, marginBottom: 8 }}>
                 <span>Missing Media Assets</span>
-                <Video size={16} color={missingAssets.length > 0 ? "var(--color-amber)" : "var(--color-emerald)"} />
+                <Video size={16} color={missingAssets.length > 0 ? "var(--color-accent)" : "var(--color-emerald)"} />
               </div>
-              <div style={{ fontSize: 28, fontWeight: 700, color: missingAssets.length > 0 ? "var(--color-amber)" : "var(--text-main)", marginBottom: 6 }}>
+              <div style={{ fontSize: 32, fontWeight: 700, color: missingAssets.length > 0 ? "var(--color-accent)" : "var(--text-main)", marginBottom: 6 }}>
                 {missingAssets.length}
               </div>
               <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>
@@ -604,12 +614,12 @@ export default function App() {
               </p>
             </div>
 
-            <div className="glass-panel" style={{ padding: 20 }}>
+            <div className="bento-card" style={{ padding: 22 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-muted)', fontSize: 13, marginBottom: 8 }}>
                 <span>Lead Approval Gates</span>
                 <MessageSquare size={16} color={pendingApprovals.length > 0 ? "var(--color-indigo)" : "var(--color-emerald)"} />
               </div>
-              <div style={{ fontSize: 28, fontWeight: 700, color: 'var(--color-indigo)', marginBottom: 6 }}>
+              <div style={{ fontSize: 32, fontWeight: 700, color: 'var(--color-indigo)', marginBottom: 6 }}>
                 {pendingApprovals.length}
               </div>
               <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>
@@ -618,54 +628,56 @@ export default function App() {
             </div>
           </div>
 
-          {/* Two-column layout: Agent Swarm & Audit Log */}
+          {/* Two-column layout: Agent Swarm & Audit Stream */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
             {/* Active Autonomous Agent Swarm */}
-            <div className="glass-panel" style={{ padding: 22 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
-                <Bot size={20} color="var(--color-cyan)" />
-                <h3 style={{ fontSize: 16, fontWeight: 600 }}>Active Gemma Multi-Agent Roles</h3>
+            <div className="bento-card" style={{ padding: 24 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 18 }}>
+                <Bot size={22} color="var(--color-cyan)" />
+                <h3 style={{ fontSize: 17, fontWeight: 700 }}>Autonomous Multi-Agent Swarm (Gemma)</h3>
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                 {[
                   { name: '1. Coordinator Agent', desc: 'Decomposes workshop milestones and maps task dependency paths.', status: 'Active', color: 'emerald' },
                   { name: '2. Scheduler & Resource Agent', desc: 'Monitors volunteer capacity; reallocates orphans on volunteer dropout.', status: 'Monitoring', color: 'cyan' },
-                  { name: '3. Media & Drive Tracker', desc: 'Verifies existence of posters, RAW photos, and post-event recap video.', status: missingAssets.length > 0 ? 'Alerting' : 'Idle', color: missingAssets.length > 0 ? 'amber' : 'emerald' },
-                  { name: '4. Comms & WhatsApp Agent', desc: 'Drafts tailored WhatsApp notifications ready for 1-click dispatch.', status: pendingApprovals.length > 0 ? 'Queue Ready' : 'Standby', color: 'purple' },
-                  { name: '5. Retrospective Auditor', desc: 'Analyzes completion rates, bottlenecks, and generates post-event insights.', status: 'Ready on Demand', color: 'indigo' }
+                  { name: '3. Media & Drive Tracker', desc: 'Verifies existence of posters, RAW photos, and post-event recap video.', status: missingAssets.length > 0 ? 'Alerting' : 'Idle', color: missingAssets.length > 0 ? 'accent' : 'emerald' },
+                  { name: '4. Comms & WhatsApp Agent', desc: 'Drafts tailored WhatsApp notifications ready for 1-click dispatch.', status: pendingApprovals.length > 0 ? 'Queue Ready' : 'Standby', color: 'indigo' },
+                  { name: '5. Retrospective Auditor', desc: 'Analyzes completion rates, bottlenecks, and generates post-event insights.', status: 'Ready on Demand', color: 'secondary' }
                 ].map((ag, i) => (
-                  <div key={i} style={{ background: 'rgba(0,0,0,0.25)', padding: 12, borderRadius: 8, border: '1px solid var(--border-subtle)' }}>
+                  <div key={i} style={{ background: 'rgba(0,0,0,0.3)', padding: 14, borderRadius: 10, border: '1px solid var(--border-subtle)' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
-                      <span style={{ fontSize: 13, fontWeight: 600 }}>{ag.name}</span>
-                      <span style={{ fontSize: 11, color: `var(--color-${ag.color})`, fontWeight: 600 }}>● {ag.status}</span>
+                      <span style={{ fontSize: 14, fontWeight: 600 }}>{ag.name}</span>
+                      <span style={{ fontSize: 11, color: `var(--color-${ag.color})`, fontWeight: 700 }} role="status" aria-atomic="true">
+                        ● {ag.status}
+                      </span>
                     </div>
-                    <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>{ag.desc}</p>
+                    <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: 0 }}>{ag.desc}</p>
                   </div>
                 ))}
               </div>
             </div>
 
             {/* Live Operations Stream */}
-            <div className="glass-panel" style={{ padding: 22 }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+            <div className="bento-card" style={{ padding: 24 }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 18 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                  <Activity size={20} color="var(--color-indigo)" />
-                  <h3 style={{ fontSize: 16, fontWeight: 600 }}>Live Operations Audit Stream</h3>
+                  <Activity size={22} color="var(--color-indigo)" />
+                  <h3 style={{ fontSize: 17, fontWeight: 700 }}>Live Operations Audit Stream</h3>
                 </div>
                 <span style={{ fontSize: 11, fontFamily: 'var(--font-mono)', color: 'var(--text-dim)' }}>
                   SQLite Persistent Logs
                 </span>
               </div>
               <div style={{
-                background: 'rgba(0, 0, 0, 0.4)',
-                borderRadius: 8,
-                padding: 14,
+                background: 'rgba(0, 0, 0, 0.5)',
+                borderRadius: 10,
+                padding: 16,
                 fontFamily: 'var(--font-mono)',
                 fontSize: 12,
                 color: '#34d399',
-                maxHeight: 340,
+                maxHeight: 360,
                 overflowY: 'auto',
-                lineHeight: 1.6
+                lineHeight: 1.7
               }}>
                 {audit_logs.length > 0 ? (
                   audit_logs.map((log, idx) => (
@@ -684,29 +696,30 @@ export default function App() {
 
       {/* TAB 2: TASKS & KANBAN GRAPH */}
       {activeTab === 'tasks' && (
-        <div className="glass-panel" style={{ padding: 22 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20, flexWrap: 'wrap', gap: 12 }}>
+        <div className="bento-card" style={{ padding: 24 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 22, flexWrap: 'wrap', gap: 14 }}>
             <div>
-              <h3 style={{ fontSize: 17, fontWeight: 600 }}>Operational Milestones & Task Graph</h3>
-              <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>
+              <h3 style={{ fontSize: 18, fontWeight: 700 }}>Operational Milestones & Task Graph</h3>
+              <p style={{ fontSize: 13, color: 'var(--text-muted)', margin: '2px 0 0 0' }}>
                 {tasks.length} tasks dynamically decomposed and mapped to volunteer skillsets by Gemma
               </p>
             </div>
 
             {/* Filter by Phase */}
-            <div style={{ display: 'flex', gap: 6 }}>
+            <div style={{ display: 'flex', gap: 6, background: 'rgba(0,0,0,0.3)', padding: 4, borderRadius: 8 }}>
               {['all', 'planning', 'promotions', 'event_day', 'post_production'].map((ph) => (
                 <button
                   key={ph}
                   onClick={() => setTaskPhaseFilter(ph)}
                   style={{
-                    padding: '4px 12px',
+                    padding: '5px 14px',
                     borderRadius: 6,
                     fontSize: 12,
+                    fontWeight: 500,
                     textTransform: 'capitalize',
-                    background: taskPhaseFilter === ph ? 'rgba(99, 102, 241, 0.25)' : 'rgba(255,255,255,0.04)',
+                    background: taskPhaseFilter === ph ? 'rgba(99, 102, 241, 0.3)' : 'transparent',
                     color: taskPhaseFilter === ph ? 'var(--color-cyan)' : 'var(--text-muted)',
-                    border: '1px solid var(--border-subtle)',
+                    border: 'none',
                     cursor: 'pointer'
                   }}
                 >
@@ -716,7 +729,7 @@ export default function App() {
             </div>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: 14 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: 16 }}>
             {filteredTasks.map((t) => {
               const isBlocked = t.status === 'blocked';
               const isCompleted = t.status === 'completed';
@@ -724,23 +737,24 @@ export default function App() {
                 <div
                   key={t.id}
                   style={{
-                    background: 'rgba(0, 0, 0, 0.25)',
+                    background: 'rgba(0, 0, 0, 0.35)',
                     border: isBlocked ? '1px solid var(--color-crimson)' : '1px solid var(--border-subtle)',
-                    borderRadius: 10,
-                    padding: 16,
+                    borderRadius: 'var(--radius-md)',
+                    padding: 18,
                     display: 'flex',
                     flexDirection: 'column',
-                    justifyContent: 'space-between'
+                    justifyContent: 'space-between',
+                    transition: 'all 0.2s ease'
                   }}
                 >
                   <div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                         <span style={{ fontSize: 11, fontFamily: 'var(--font-mono)', color: 'var(--text-dim)' }}>{t.id}</span>
                         <span style={{
                           fontSize: 10,
                           fontWeight: 700,
-                          padding: '1px 6px',
+                          padding: '2px 6px',
                           borderRadius: 4,
                           background: t.priority === 'critical' ? 'rgba(239,68,68,0.2)' : 'rgba(99,102,241,0.2)',
                           color: t.priority === 'critical' ? 'var(--color-crimson)' : 'var(--color-indigo)',
@@ -749,28 +763,24 @@ export default function App() {
                           {t.priority}
                         </span>
                       </div>
-                      <span style={{
-                        fontSize: 11,
-                        padding: '2px 8px',
-                        borderRadius: 9999,
-                        background: isCompleted ? 'rgba(16,185,129,0.15)' : (isBlocked ? 'rgba(239,68,68,0.15)' : 'rgba(245,158,11,0.15)'),
-                        color: isCompleted ? 'var(--color-emerald)' : (isBlocked ? 'var(--color-crimson)' : 'var(--color-amber)'),
-                        fontWeight: 600,
+                      <span className="badge-atomic" style={{
+                        background: isCompleted ? 'rgba(16,185,129,0.18)' : (isBlocked ? 'rgba(239,68,68,0.18)' : 'rgba(245,158,11,0.18)'),
+                        color: isCompleted ? 'var(--color-emerald)' : (isBlocked ? 'var(--color-crimson)' : 'var(--color-accent)'),
                         textTransform: 'capitalize'
-                      }}>
+                      }} role="status" aria-atomic="true">
                         {t.status.replace('_', ' ')}
                       </span>
                     </div>
 
-                    <h4 style={{ fontSize: 14, fontWeight: 600, marginBottom: 6, lineHeight: 1.4 }}>{t.title}</h4>
-                    <p style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 12 }}>{t.description}</p>
+                    <h4 style={{ fontSize: 15, fontWeight: 600, marginBottom: 8, lineHeight: 1.4 }}>{t.title}</h4>
+                    <p style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 14 }}>{t.description}</p>
 
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, fontSize: 11, marginBottom: 12 }}>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, fontSize: 11, marginBottom: 14 }}>
                       <div style={{ color: 'var(--text-dim)', display: 'flex', alignItems: 'center', gap: 4 }}>
                         <Clock size={12} /> {t.deadline_relative}
                       </div>
                       <div style={{ color: 'var(--color-indigo)', display: 'flex', alignItems: 'center', gap: 4 }}>
-                        <Users size={12} /> {t.assignee_name || <span style={{ color: 'var(--color-crimson)' }}>Unassigned!</span>}
+                        <Users size={12} /> {t.assignee_name || <span style={{ color: 'var(--color-crimson)', fontWeight: 700 }}>Unassigned!</span>}
                       </div>
                       {t.asset_required && (
                         <div style={{ color: 'var(--color-cyan)', display: 'flex', alignItems: 'center', gap: 4 }}>
@@ -781,14 +791,13 @@ export default function App() {
                   </div>
 
                   {/* Task Action Bar */}
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: 10, marginTop: 4 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: 12, marginTop: 4 }}>
                     <span style={{ fontSize: 11, color: 'var(--text-dim)' }}>Phase: {t.phase}</span>
                     <div style={{ display: 'flex', gap: 6 }}>
                       {t.status !== 'completed' ? (
                         <button
                           onClick={() => handleTaskStatusChange(t.id, 'completed')}
                           className="btn-success"
-                          style={{ padding: '4px 10px', fontSize: 11 }}
                         >
                           <Check size={12} /> Mark Done
                         </button>
@@ -796,7 +805,6 @@ export default function App() {
                         <button
                           onClick={() => handleTaskStatusChange(t.id, 'in_progress')}
                           className="btn-secondary"
-                          style={{ padding: '4px 10px', fontSize: 11 }}
                         >
                           Reopen
                         </button>
@@ -812,17 +820,17 @@ export default function App() {
 
       {/* TAB 3: VOLUNTEERS & CAPACITY MATRIX */}
       {activeTab === 'volunteers' && (
-        <div className="glass-panel" style={{ padding: 22 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+        <div className="bento-card" style={{ padding: 24 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 22 }}>
             <div>
-              <h3 style={{ fontSize: 17, fontWeight: 600 }}>University Society Volunteer Roster</h3>
-              <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>
+              <h3 style={{ fontSize: 18, fontWeight: 700 }}>University Society Volunteer Roster</h3>
+              <p style={{ fontSize: 13, color: 'var(--text-muted)', margin: '2px 0 0 0' }}>
                 Real student volunteers, contacts, skillset matching, and capacity workload meters
               </p>
             </div>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 18 }}>
             {volunteers.map((v) => {
               const isUnavailable = v.status === 'unavailable';
               const assignedTasks = tasks.filter(t => t.assignee_id === v.id);
@@ -830,79 +838,75 @@ export default function App() {
                 <div
                   key={v.id}
                   style={{
-                    background: 'rgba(0, 0, 0, 0.25)',
-                    border: isUnavailable ? '1px solid rgba(239,68,68,0.4)' : '1px solid var(--border-subtle)',
-                    borderRadius: 10,
-                    padding: 18,
+                    background: 'rgba(0, 0, 0, 0.35)',
+                    border: isUnavailable ? '1px solid rgba(239,68,68,0.45)' : '1px solid var(--border-subtle)',
+                    borderRadius: 'var(--radius-md)',
+                    padding: 20,
                     display: 'flex',
                     flexDirection: 'column',
                     justifyContent: 'space-between'
                   }}
                 >
                   <div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                         <div style={{
-                          width: 34,
-                          height: 34,
-                          borderRadius: 8,
-                          background: isUnavailable ? 'rgba(239,68,68,0.2)' : 'linear-gradient(135deg, #6366f1, #06b6d4)',
-                          color: isUnavailable ? 'var(--color-crimson)' : '#fff',
+                          width: 36,
+                          height: 36,
+                          borderRadius: 10,
+                          background: isUnavailable ? 'rgba(239,68,68,0.25)' : 'linear-gradient(135deg, #6366f1, #06b6d4)',
+                          color: isUnavailable ? 'var(--color-crimson)' : '#ffffff',
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
                           fontWeight: 700,
-                          fontSize: 14
+                          fontSize: 15
                         }}>
                           {v.name.charAt(0)}
                         </div>
                         <div>
-                          <h4 style={{ fontSize: 15, fontWeight: 600 }}>{v.name}</h4>
+                          <h4 style={{ fontSize: 15, fontWeight: 600, margin: 0 }}>{v.name}</h4>
                           <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{v.role}</span>
                         </div>
                       </div>
 
-                      <span style={{
-                        fontSize: 11,
-                        padding: '2px 8px',
-                        borderRadius: 9999,
-                        background: isUnavailable ? 'rgba(239,68,68,0.2)' : 'rgba(16,185,129,0.15)',
+                      <span className="badge-atomic" style={{
+                        background: isUnavailable ? 'rgba(239,68,68,0.2)' : 'rgba(16,185,129,0.18)',
                         color: isUnavailable ? 'var(--color-crimson)' : 'var(--color-emerald)',
-                        fontWeight: 600,
                         textTransform: 'capitalize'
-                      }}>
+                      }} role="status" aria-atomic="true">
                         {v.status}
                       </span>
                     </div>
 
-                    <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 12 }}>
+                    <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 14 }}>
                       <div>Phone: <span style={{ fontFamily: 'var(--font-mono)', color: 'var(--text-main)' }}>{v.phone}</span></div>
                       <div>Email: <span style={{ color: 'var(--text-dim)' }}>{v.email}</span></div>
                     </div>
 
                     {/* Workload Meter */}
-                    <div style={{ marginBottom: 12 }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: 'var(--text-muted)', marginBottom: 4 }}>
+                    <div style={{ marginBottom: 14 }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: 'var(--text-muted)', marginBottom: 5 }}>
                         <span>Assigned Tasks</span>
-                        <span>{assignedTasks.length} / {v.max_capacity} max</span>
+                        <span>{assignedTasks.length} / {v.max_capacity} capacity</span>
                       </div>
-                      <div style={{ width: '100%', height: 6, background: 'rgba(255,255,255,0.06)', borderRadius: 9999, overflow: 'hidden' }}>
+                      <div style={{ width: '100%', height: 7, background: 'rgba(255,255,255,0.06)', borderRadius: 9999, overflow: 'hidden' }}>
                         <div style={{
                           width: `${Math.min((assignedTasks.length / v.max_capacity) * 100, 100)}%`,
                           height: '100%',
-                          background: assignedTasks.length >= v.max_capacity ? 'var(--color-amber)' : 'var(--color-cyan)'
+                          background: assignedTasks.length >= v.max_capacity ? 'var(--color-accent)' : 'var(--color-cyan)'
                         }} />
                       </div>
                     </div>
 
-                    {/* Skills tags */}
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginBottom: 12 }}>
+                    {/* Skills chips */}
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginBottom: 14 }}>
                       {v.skills && v.skills.map((s, idx) => (
                         <span key={idx} style={{
                           fontSize: 10,
-                          padding: '2px 6px',
+                          padding: '2px 7px',
                           borderRadius: 4,
-                          background: 'rgba(255,255,255,0.05)',
+                          background: 'rgba(255,255,255,0.06)',
                           color: 'var(--text-dim)'
                         }}>
                           {s}
@@ -927,14 +931,14 @@ export default function App() {
                           });
                         }}
                         className="btn-secondary"
-                        style={{ width: '100%', justifyContent: 'center', fontSize: 11, color: 'var(--color-crimson)' }}
+                        style={{ width: '100%', justifyContent: 'center', fontSize: 12, color: 'var(--color-crimson)' }}
                       >
-                        <AlertTriangle size={12} />
+                        <AlertTriangle size={13} />
                         Simulate Dropout & Reassign
                       </button>
                     ) : (
                       <div style={{ textAlign: 'center', fontSize: 12, color: 'var(--color-crimson)', padding: '6px' }}>
-                        Unavailable (Tasks reassigned via Approval)
+                        Unavailable (Tasks reassigned via Approval Queue)
                       </div>
                     )}
                   </div>
@@ -947,34 +951,34 @@ export default function App() {
 
       {/* TAB 4: MEDIA & GOOGLE DRIVE VAULT */}
       {activeTab === 'assets' && (
-        <div className="glass-panel" style={{ padding: 22 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+        <div className="bento-card" style={{ padding: 24 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 22 }}>
             <div>
-              <h3 style={{ fontSize: 17, fontWeight: 600 }}>Media Deliverables & Google Drive Vault</h3>
-              <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>
+              <h3 style={{ fontSize: 18, fontWeight: 700 }}>Media Deliverables & Google Drive Vault</h3>
+              <p style={{ fontSize: 13, color: 'var(--text-muted)', margin: '2px 0 0 0' }}>
                 Verification tracker for event posters, RAW camera footage, teaser reels, and recap highlight videos
               </p>
             </div>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 16 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 18 }}>
             {assets.map((asset) => {
               const isMissing = asset.status === 'missing';
               return (
                 <div
                   key={asset.id}
                   style={{
-                    background: 'rgba(0, 0, 0, 0.25)',
-                    border: isMissing ? '1px solid rgba(239,68,68,0.4)' : '1px solid var(--border-subtle)',
-                    borderRadius: 10,
-                    padding: 18,
+                    background: 'rgba(0, 0, 0, 0.35)',
+                    border: isMissing ? '1px solid rgba(239,68,68,0.45)' : '1px solid var(--border-subtle)',
+                    borderRadius: 'var(--radius-md)',
+                    padding: 20,
                     display: 'flex',
                     flexDirection: 'column',
                     justifyContent: 'space-between'
                   }}
                 >
                   <div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                         {asset.asset_type === 'recap_video' || asset.asset_type === 'teaser_video' ? (
                           <Video size={18} color="var(--color-cyan)" />
@@ -986,28 +990,24 @@ export default function App() {
                         </span>
                       </div>
 
-                      <span style={{
-                        fontSize: 11,
-                        padding: '2px 8px',
-                        borderRadius: 9999,
-                        background: isMissing ? 'rgba(239,68,68,0.2)' : 'rgba(16,185,129,0.15)',
+                      <span className="badge-atomic" style={{
+                        background: isMissing ? 'rgba(239,68,68,0.2)' : 'rgba(16,185,129,0.18)',
                         color: isMissing ? 'var(--color-crimson)' : 'var(--color-emerald)',
-                        fontWeight: 600,
                         textTransform: 'uppercase'
-                      }}>
+                      }} role="status" aria-atomic="true">
                         {asset.status}
                       </span>
                     </div>
 
-                    <h4 style={{ fontSize: 15, fontWeight: 600, marginBottom: 6 }}>{asset.title}</h4>
-                    <p style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 12 }}>{asset.notes || 'No extra notes'}</p>
+                    <h4 style={{ fontSize: 15, fontWeight: 600, marginBottom: 8 }}>{asset.title}</h4>
+                    <p style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 14 }}>{asset.notes || 'No extra notes'}</p>
 
-                    <div style={{ fontSize: 12, color: 'var(--text-dim)', marginBottom: 12 }}>
+                    <div style={{ fontSize: 12, color: 'var(--text-dim)', marginBottom: 14 }}>
                       <div>Expected By: <strong style={{ color: 'var(--text-main)' }}>{asset.expected_by}</strong></div>
                       <div>Responsible Role: <strong style={{ color: 'var(--color-indigo)' }}>{asset.owner_role}</strong></div>
-                      <div>Google Drive URL: {asset.drive_url ? (
-                        <a href={asset.drive_url} target="_blank" rel="noreferrer" style={{ color: 'var(--color-cyan)' }}>
-                          Open Drive Link ↗
+                      <div>Drive URL: {asset.drive_url ? (
+                        <a href={asset.drive_url} target="_blank" rel="noreferrer" style={{ color: 'var(--color-cyan)', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                          Open Drive Link <ArrowUpRight size={12} />
                         </a>
                       ) : (
                         <span style={{ color: 'var(--color-crimson)' }}>Unlinked / Missing</span>
@@ -1016,7 +1016,7 @@ export default function App() {
                   </div>
 
                   {/* Status Toggle & Link updater */}
-                  <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
+                  <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
                     {isMissing ? (
                       <button
                         onClick={async () => {
@@ -1032,9 +1032,9 @@ export default function App() {
                           }
                         }}
                         className="btn-primary"
-                        style={{ width: '100%', justifyContent: 'center', fontSize: 12 }}
+                        style={{ width: '100%', justifyContent: 'center', fontSize: 13 }}
                       >
-                        <ExternalLink size={13} />
+                        <ExternalLink size={14} />
                         Link Google Drive File
                       </button>
                     ) : (
@@ -1049,7 +1049,7 @@ export default function App() {
                           showToast(`Marked ${asset.title} as missing`, 'info');
                         }}
                         className="btn-secondary"
-                        style={{ width: '100%', justifyContent: 'center', fontSize: 12 }}
+                        style={{ width: '100%', justifyContent: 'center', fontSize: 13 }}
                       >
                         Mark Missing
                       </button>
@@ -1066,11 +1066,11 @@ export default function App() {
       {activeTab === 'approvals' && (
         <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: 20 }}>
           {/* Left Column: Human-In-The-Loop Approval Gates */}
-          <div className="glass-panel" style={{ padding: 22 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 18 }}>
+          <div className="bento-card" style={{ padding: 24 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                <ShieldAlert size={20} color="var(--color-indigo)" />
-                <h3 style={{ fontSize: 16, fontWeight: 600 }}>Human-in-the-Loop Approval Queue</h3>
+                <ShieldAlert size={22} color="var(--color-indigo)" />
+                <h3 style={{ fontSize: 17, fontWeight: 700 }}>Human-in-the-Loop Approval Queue</h3>
               </div>
               <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>
                 {pendingApprovals.length} Action(s) Require Authorization
@@ -1083,59 +1083,53 @@ export default function App() {
                   <div
                     key={app.id}
                     style={{
-                      background: 'rgba(0, 0, 0, 0.3)',
+                      background: 'rgba(0, 0, 0, 0.4)',
                       border: '1px solid var(--border-subtle)',
-                      borderRadius: 10,
-                      padding: 16
+                      borderRadius: 'var(--radius-md)',
+                      padding: 18
                     }}
                   >
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10 }}>
                       <div>
                         <span style={{
                           fontSize: 10,
                           fontWeight: 700,
-                          padding: '2px 6px',
+                          padding: '2px 7px',
                           borderRadius: 4,
-                          background: app.approval_type === 'reallocation' ? 'rgba(245,158,11,0.2)' : 'rgba(99,102,241,0.2)',
-                          color: app.approval_type === 'reallocation' ? 'var(--color-amber)' : 'var(--color-indigo)',
+                          background: app.approval_type === 'reallocation' ? 'rgba(245,158,11,0.25)' : 'rgba(99,102,241,0.25)',
+                          color: app.approval_type === 'reallocation' ? 'var(--color-accent)' : 'var(--color-indigo)',
                           textTransform: 'uppercase'
                         }}>
                           {app.approval_type}
                         </span>
-                        <h4 style={{ fontSize: 15, fontWeight: 600, marginTop: 4 }}>{app.title}</h4>
+                        <h4 style={{ fontSize: 15, fontWeight: 600, marginTop: 6, margin: '6px 0 0 0' }}>{app.title}</h4>
                       </div>
 
-                      <span style={{
-                        fontSize: 11,
-                        padding: '2px 8px',
-                        borderRadius: 9999,
-                        background: app.status === 'approved' ? 'rgba(16,185,129,0.15)' : (app.status === 'rejected' ? 'rgba(239,68,68,0.15)' : 'rgba(245,158,11,0.15)'),
-                        color: app.status === 'approved' ? 'var(--color-emerald)' : (app.status === 'rejected' ? 'var(--color-crimson)' : 'var(--color-amber)'),
-                        fontWeight: 600,
+                      <span className="badge-atomic" style={{
+                        background: app.status === 'approved' ? 'rgba(16,185,129,0.18)' : (app.status === 'rejected' ? 'rgba(239,68,68,0.18)' : 'rgba(245,158,11,0.18)'),
+                        color: app.status === 'approved' ? 'var(--color-emerald)' : (app.status === 'rejected' ? 'var(--color-crimson)' : 'var(--color-accent)'),
                         textTransform: 'capitalize'
-                      }}>
+                      }} role="status" aria-atomic="true">
                         {app.status}
                       </span>
                     </div>
 
-                    <p style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 12 }}>{app.details}</p>
+                    <p style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 14 }}>{app.details}</p>
 
                     {/* Action buttons if pending */}
                     {app.status === 'pending' && (
-                      <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 10 }}>
+                      <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 12 }}>
                         <button
                           onClick={() => handleApprovalAction(app.id, 'rejected')}
                           className="btn-danger"
-                          style={{ padding: '6px 14px', fontSize: 12 }}
                         >
-                          <X size={13} /> Reject
+                          <X size={14} /> Decline
                         </button>
                         <button
                           onClick={() => handleApprovalAction(app.id, 'approved')}
                           className="btn-primary"
-                          style={{ padding: '6px 14px', fontSize: 12 }}
                         >
-                          <Check size={13} /> Authorize & Apply
+                          <Check size={14} /> Authorize & Apply
                         </button>
                       </div>
                     )}
@@ -1143,20 +1137,21 @@ export default function App() {
                 ))}
               </div>
             ) : (
-              <div style={{ textAlign: 'center', padding: '40px 20px', color: 'var(--text-dim)' }}>
-                No actions currently require lead authorization.
+              <div style={{ textAlign: 'center', padding: '60px 20px', color: 'var(--text-dim)' }}>
+                <ClipboardCheck size={36} style={{ opacity: 0.3, marginBottom: 12 }} />
+                <p>No actions currently require lead authorization.</p>
               </div>
             )}
           </div>
 
           {/* Right Column: WhatsApp Dispatcher */}
-          <div className="glass-panel" style={{ padding: 22 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 18 }}>
-              <MessageSquare size={20} color="var(--color-emerald)" />
-              <h3 style={{ fontSize: 16, fontWeight: 600 }}>WhatsApp Message Dispatcher</h3>
+          <div className="bento-card" style={{ padding: 24 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
+              <MessageSquare size={22} color="var(--color-emerald)" />
+              <h3 style={{ fontSize: 17, fontWeight: 700 }}>WhatsApp Message Dispatcher</h3>
             </div>
 
-            <p style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 14 }}>
+            <p style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 16 }}>
               Contextual messages drafted by Gemma Comms Agent with direct 1-click WhatsApp launch
             </p>
 
@@ -1169,26 +1164,22 @@ export default function App() {
                   <div
                     key={draft.id}
                     style={{
-                      background: 'rgba(0, 0, 0, 0.35)',
+                      background: 'rgba(0, 0, 0, 0.45)',
                       border: '1px solid var(--border-subtle)',
-                      borderRadius: 10,
-                      padding: 16
+                      borderRadius: 'var(--radius-md)',
+                      padding: 18
                     }}
                   >
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
                       <div>
-                        <span style={{ fontSize: 13, fontWeight: 600 }}>{draft.recipient_name}</span>
+                        <span style={{ fontSize: 14, fontWeight: 600 }}>{draft.recipient_name}</span>
                         <span style={{ fontSize: 11, color: 'var(--text-dim)', marginLeft: 6 }}>({draft.phone})</span>
                       </div>
-                      <span style={{
-                        fontSize: 10,
-                        padding: '1px 6px',
-                        borderRadius: 4,
-                        background: 'rgba(16,185,129,0.15)',
+                      <span className="badge-atomic" style={{
+                        background: 'rgba(16,185,129,0.18)',
                         color: 'var(--color-emerald)',
-                        textTransform: 'uppercase',
-                        fontWeight: 700
-                      }}>
+                        textTransform: 'uppercase'
+                      }} role="status" aria-atomic="true">
                         {draft.context.replace('_', ' ')}
                       </span>
                     </div>
@@ -1196,12 +1187,12 @@ export default function App() {
                     <div style={{
                       background: 'rgba(16, 185, 129, 0.08)',
                       borderLeft: '3px solid var(--color-emerald)',
-                      padding: 10,
-                      borderRadius: 6,
-                      fontSize: 12,
+                      padding: 12,
+                      borderRadius: 8,
+                      fontSize: 13,
                       color: 'var(--text-main)',
-                      lineHeight: 1.5,
-                      marginBottom: 12
+                      lineHeight: 1.6,
+                      marginBottom: 14
                     }}>
                       "{draft.message_body}"
                     </div>
@@ -1212,9 +1203,9 @@ export default function App() {
                         target="_blank"
                         rel="noreferrer"
                         className="btn-success"
-                        style={{ textDecoration: 'none', fontSize: 12, padding: '6px 12px' }}
+                        style={{ textDecoration: 'none' }}
                       >
-                        <Send size={13} />
+                        <Send size={14} />
                         Launch WhatsApp Web (wa.me)
                       </a>
                     </div>
@@ -1228,11 +1219,11 @@ export default function App() {
 
       {/* TAB 6: RETROSPECTIVE & POST-MORTEM REPORT */}
       {activeTab === 'retrospective' && (
-        <div className="glass-panel" style={{ padding: 24 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+        <div className="bento-card" style={{ padding: 26 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 22 }}>
             <div>
-              <h3 style={{ fontSize: 18, fontWeight: 600 }}>Post-Event Society Retrospective Report</h3>
-              <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>
+              <h3 style={{ fontSize: 19, fontWeight: 700 }}>Post-Event Society Retrospective Report</h3>
+              <p style={{ fontSize: 13, color: 'var(--text-muted)', margin: '2px 0 0 0' }}>
                 Automated post-mortem analysis synthesized by Gemma evaluating tasks, delays, assets, and society lessons learned
               </p>
             </div>
@@ -1248,13 +1239,13 @@ export default function App() {
           </div>
 
           <div style={{
-            background: 'rgba(0,0,0,0.35)',
+            background: 'rgba(0,0,0,0.45)',
             border: '1px solid var(--border-subtle)',
-            borderRadius: 10,
-            padding: 24,
-            lineHeight: 1.7,
+            borderRadius: 'var(--radius-md)',
+            padding: 26,
+            lineHeight: 1.75,
             fontSize: 14,
-            maxHeight: 600,
+            maxHeight: 620,
             overflowY: 'auto'
           }}>
             {retrospectiveReport ? (
@@ -1263,7 +1254,7 @@ export default function App() {
               </div>
             ) : (
               <div style={{ textAlign: 'center', padding: '60px 20px', color: 'var(--text-dim)' }}>
-                <FileText size={40} style={{ opacity: 0.3, marginBottom: 12 }} />
+                <FileText size={42} style={{ opacity: 0.3, marginBottom: 14 }} />
                 <p>Click "Re-Generate Retrospective" to have Gemma analyze event completion data and synthesize the society report.</p>
               </div>
             )}
@@ -1277,15 +1268,15 @@ export default function App() {
           <div className="modal-content">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 18 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                <Sparkles size={20} color="var(--color-cyan)" />
-                <h3 style={{ fontSize: 18, fontWeight: 700 }}>Intake New Campus Event (Gemma)</h3>
+                <Sparkles size={22} color="var(--color-cyan)" />
+                <h3 style={{ fontSize: 18, fontWeight: 700, margin: 0 }}>Intake New Campus Event (Gemma)</h3>
               </div>
               <button onClick={() => setShowNewEventModal(false)} style={{ background: 'transparent', border: 'none', color: 'var(--text-dim)', cursor: 'pointer' }}>
                 <X size={20} />
               </button>
             </div>
 
-            <p style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 18 }}>
+            <p style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 20 }}>
               Provide event parameters. Gemma will autonomously generate a 15-20 task dependency breakdown, assign roles, and map deliverables.
             </p>
 
@@ -1330,13 +1321,13 @@ export default function App() {
             }}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
                 <div>
-                  <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-muted)', display: 'block', marginBottom: 4 }}>Event Title</label>
+                  <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-muted)', display: 'block', marginBottom: 5 }}>Event Title</label>
                   <input name="title" defaultValue="Inter-University AI & Robotics Hackathon" required className="input-field" />
                 </div>
 
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
                   <div>
-                    <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-muted)', display: 'block', marginBottom: 4 }}>Category</label>
+                    <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-muted)', display: 'block', marginBottom: 5 }}>Category</label>
                     <select name="category" className="input-field" style={{ background: '#0a0d14' }}>
                       <option value="workshop">Workshop</option>
                       <option value="hackathon">Hackathon</option>
@@ -1345,28 +1336,28 @@ export default function App() {
                     </select>
                   </div>
                   <div>
-                    <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-muted)', display: 'block', marginBottom: 4 }}>Expected Audience</label>
+                    <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-muted)', display: 'block', marginBottom: 5 }}>Expected Audience</label>
                     <input name="expected_audience" type="number" defaultValue="80" className="input-field" />
                   </div>
                 </div>
 
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
                   <div>
-                    <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-muted)', display: 'block', marginBottom: 4 }}>Date</label>
+                    <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-muted)', display: 'block', marginBottom: 5 }}>Date</label>
                     <input name="date_str" defaultValue="Dec 05, 2026" className="input-field" />
                   </div>
                   <div>
-                    <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-muted)', display: 'block', marginBottom: 4 }}>Venue</label>
+                    <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-muted)', display: 'block', marginBottom: 5 }}>Venue</label>
                     <input name="venue" defaultValue="Auditorium Hall B" className="input-field" />
                   </div>
                 </div>
 
                 <div>
-                  <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-muted)', display: 'block', marginBottom: 4 }}>Description & Goals</label>
+                  <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-muted)', display: 'block', marginBottom: 5 }}>Description & Goals</label>
                   <textarea name="description" rows={3} defaultValue="Flagship annual hackathon bringing together 80 engineering students to build autonomous hardware & AI applications." className="input-field" />
                 </div>
 
-                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 10 }}>
+                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 12 }}>
                   <button type="button" onClick={() => setShowNewEventModal(false)} className="btn-secondary">Cancel</button>
                   <button type="submit" disabled={actionLoading} className="btn-primary">
                     <Sparkles size={14} />
@@ -1385,8 +1376,8 @@ export default function App() {
           <div className="modal-content" style={{ maxWidth: 520 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <Sparkles size={18} color="var(--color-cyan)" />
-                <h3 style={{ fontSize: 17, fontWeight: 700 }}>Gemma LLM Configuration</h3>
+                <Sparkles size={20} color="var(--color-cyan)" />
+                <h3 style={{ fontSize: 18, fontWeight: 700, margin: 0 }}>Gemma LLM Configuration</h3>
               </div>
               <button onClick={() => setShowSettingsModal(false)} style={{ background: 'transparent', border: 'none', color: 'var(--text-dim)', cursor: 'pointer' }}>
                 <X size={18} />
@@ -1399,7 +1390,7 @@ export default function App() {
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
               <div>
-                <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-muted)', display: 'block', marginBottom: 4 }}>
+                <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-muted)', display: 'block', marginBottom: 5 }}>
                   Google AI Studio API Key
                 </label>
                 <input
@@ -1409,7 +1400,7 @@ export default function App() {
                   onChange={(e) => setApiKeyInput(e.target.value)}
                   className="input-field"
                 />
-                <div style={{ fontSize: 11, color: 'var(--text-dim)', marginTop: 4 }}>
+                <div style={{ fontSize: 11, color: 'var(--text-dim)', marginTop: 5 }}>
                   Get your free API key at{' '}
                   <a href="https://aistudio.google.com/" target="_blank" rel="noreferrer" style={{ color: 'var(--color-cyan)' }}>
                     aistudio.google.com ↗
@@ -1418,7 +1409,7 @@ export default function App() {
               </div>
 
               <div>
-                <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-muted)', display: 'block', marginBottom: 4 }}>
+                <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-muted)', display: 'block', marginBottom: 5 }}>
                   Gemma Model Variant
                 </label>
                 <select
@@ -1432,7 +1423,7 @@ export default function App() {
                 </select>
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 10 }}>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 12 }}>
                 <button onClick={() => setShowSettingsModal(false)} className="btn-secondary">Close</button>
                 <button onClick={handleSaveSettings} className="btn-primary">
                   Save Credentials
